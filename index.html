@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>阅读器</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="toolbar">
+        <div class="left-controls">
+            <button id="showCatalog" title="目录 (Ctrl+L)">≡</button>
+            <button id="prevPage" title="上一页 (←)">←</button>
+            <button id="nextPage" title="下一页 (→)">→</button>
+            <span id="progress">0%</span>
+            <span id="fileName"></span>
+        </div>
+        <div class="center-controls">
+            <button id="showBookshelf" title="书架 (Ctrl+B)">📚</button>
+            <button id="showNotes" title="笔记 (Ctrl+N)">📝</button>
+            <button id="showHistory" title="阅读历史">📅</button>
+        </div>
+        <div class="right-controls">
+            <input type="text" id="searchInput" placeholder="搜索..." />
+            <button id="searchButton">🔍</button>
+            <button id="showFontSettings" title="字体设置">Aa</button>
+            <button id="toggleTheme" title="切换主题 (Ctrl+T)">🌓</button>
+            <button id="showSettings" title="设置">⚙️</button>
+            <button id="showHelp" title="帮助 (F1)">?</button>
+            <button id="fullscreen" title="全屏 (F11)">⛶</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div id="reader">
+            <div class="drop-zone">
+                <div class="drop-text">
+                    <span class="upload-icon">📄</span>
+                    <span>将文件拖放到此处，或</span>
+                    <button class="select-file-btn">选择文件</button>
+                    <span class="file-hint">支持 .txt 文件</span>
+                </div>
+            </div>
+            <div id="textContent" class="text-content"></div>
+        </div>
+    </div>
+
+    <div id="bookshelfPanel" class="side-panel">
+        <div class="panel-content">
+            <h3>我的书架
+                <button class="close-button">×</button>
+            </h3>
+            <div class="bookshelf-toolbar">
+                <input type="text" id="bookSearch" placeholder="搜索书籍...">
+                <select id="bookSort">
+                    <option value="recent">最近阅读</option>
+                    <option value="name">按名称</option>
+                    <option value="progress">按进度</option>
+                </select>
+                <button id="importBooks" title="导入书籍">📥</button>
+            </div>
+            <div class="book-categories">
+                <button class="category active" data-category="all">全部</button>
+                <button class="category" data-category="reading">在读</button>
+                <button class="category" data-category="finished">已读完</button>
+                <button class="category" data-category="marked">已收藏</button>
+            </div>
+            <div id="bookList" class="book-list"></div>
+        </div>
+    </div>
+
+    <div id="notesPanel" class="side-panel">
+        <div class="panel-content">
+            <h3>笔记管理
+                <button class="close-button">×</button>
+            </h3>
+            <div class="notes-toolbar">
+                <input type="text" id="noteSearch" placeholder="搜索笔记...">
+                <select id="noteSort">
+                    <option value="recent">最近添加</option>
+                    <option value="book">按书籍</option>
+                    <option value="category">按分类</option>
+                </select>
+                <div class="note-actions">
+                    <button id="exportNotes" title="导出笔记">📥</button>
+                    <button id="createNote" title="新建笔记">✏️</button>
+                </div>
+            </div>
+            <div class="note-categories">
+                <button class="category active" data-category="all">全部笔记</button>
+                <button class="category" data-category="important">重要</button>
+                <button class="category" data-category="question">疑问</button>
+                <button class="category" data-category="idea">想法</button>
+                <button class="category" data-category="marked">标记</button>
+            </div>
+            <div id="notesList" class="notes-list"></div>
+        </div>
+    </div>
+
+    <div id="noteEditorDialog" class="modal-dialog" style="display: none;">
+        <div class="modal-content">
+            <h3>
+                <span id="noteEditorTitle">编辑笔记</span>
+                <button class="close-button">×</button>
+            </h3>
+            <div class="note-editor">
+                <div class="note-info">
+                    <select id="noteCategory" class="note-category-select">
+                        <option value="general">普通笔记</option>
+                        <option value="important">重要</option>
+                        <option value="question">疑问</option>
+                        <option value="idea">想法</option>
+                        <option value="marked">标记</option>
+                    </select>
+                    <input type="text" id="noteTitle" placeholder="笔记标题" class="note-title-input">
+                </div>
+                <div class="note-source">
+                    <span class="book-title"></span>
+                    <span class="selected-text"></span>
+                </div>
+                <textarea id="noteContent" placeholder="在此输入笔记内容..." class="note-content-input"></textarea>
+                <div class="note-tags">
+                    <input type="text" id="noteTags" placeholder="添加标签，用逗号分隔" class="note-tags-input">
+                </div>
+                <div class="modal-buttons">
+                    <button id="cancelNote">取消</button>
+                    <button id="saveNote" class="primary">保存笔记</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="settingsDialog" class="modal-dialog" style="display: none;">
+        <div class="modal-content">
+            <h3>
+                设置
+                <button class="close-button">×</button>
+            </h3>
+            <div class="settings-editor">
+                <div class="settings-section">
+                    <h4>背景颜色</h4>
+                    <div class="color-settings">
+                        <div class="color-picker">
+                            <input type="color" id="bgColorPicker" title="选择自定义颜色">
+                            <label for="bgColorPicker">自定义颜色</label>
+                        </div>
+                        <div class="preset-colors">
+                            <button class="color-preset" data-color="#ffffff" style="background-color: #ffffff;" title="默认白色">默认</button>
+                            <button class="color-preset" data-color="#f5e6d3" style="background-color: #f5e6d3;" title="护眼米色">米色</button>
+                            <button class="color-preset" data-color="#e8f3e8" style="background-color: #e8f3e8;" title="清新绿色">浅绿</button>
+                            <button class="color-preset" data-color="#e8f0f8" style="background-color: #e8f0f8;" title="淡雅蓝色">浅蓝</button>
+                            <button class="color-preset" data-color="#f8e8f0" style="background-color: #f8e8f0;" title="温柔粉色">浅粉</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-buttons">
+                    <button id="resetSettings">恢复默认</button>
+                    <button id="saveSettings" class="primary">保存设置</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="reader.js"></script>
+</body>
+</html> 
